@@ -2,7 +2,7 @@
 <template>
   <div>
     <h1>projects page</h1>
-    <RouterLink to="/">home</RouterLink>
+    <RouterLink :to="{ name: '/projects/[id]', params: { id: 1 } }">home</RouterLink>
   </div>
 </template>
 <style scoped></style>
