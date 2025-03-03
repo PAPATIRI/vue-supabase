@@ -1,7 +1,11 @@
 <script lang="ts" setup>
 import supabase from '@/lib/supabaseClient'
 import { ref } from 'vue'
+import { h } from 'vue'
+import type { ColumnDef } from '@tanstack/vue-table'
 import type { Tables } from '../../../database.types'
+import DataTable from '@/components/ui/data-table/DataTable.vue'
+import { RouterLink } from 'vue-router'
 
 const tasks = ref<Tables<'tasks'>[] | null>(null)
 ;(async () => {
@@ -11,14 +15,56 @@ const tasks = ref<Tables<'tasks'>[] | null>(null)
 
   tasks.value = data
 })()
+
+const columns: ColumnDef<Tables<'tasks'>>[] = [
+  {
+    accessorKey: 'name',
+    header: () => h('div', { class: 'text-left' }, 'Name'),
+    cell: ({ row }) => {
+      return h(
+        RouterLink,
+        { to: `/projects/${row.original.id}`, class: 'text-left font-medium w-full block' },
+        () => row.getValue('name'),
+      )
+    },
+  },
+  {
+    accessorKey: 'status',
+    header: () => h('div', { class: 'text-left' }, 'Status'),
+    cell: ({ row }) => {
+      return h('div', { class: 'text-left font-medium' }, row.getValue('status'))
+    },
+  },
+  {
+    accessorKey: 'due_date',
+    header: () => h('div', { class: 'text-left' }, 'Due Date'),
+    cell: ({ row }) => {
+      return h('div', { class: 'text-left font-medium' }, row.getValue('due_date'))
+    },
+  },
+  {
+    accessorKey: 'project_id',
+    header: () => h('div', { class: 'text-left' }, 'Project'),
+    cell: ({ row }) => {
+      return h('div', { class: 'text-left font-medium' }, row.getValue('project_id'))
+    },
+  },
+  {
+    accessorKey: 'collaborators',
+    header: () => h('div', { class: 'text-left' }, 'Collaborators'),
+    cell: ({ row }) => {
+      return h(
+        'div',
+        { class: 'text-left font-medium' },
+        JSON.stringify(row.getValue('collaborators')),
+      )
+    },
+  },
+]
 </script>
 <template>
   <div>
-    <h1>tasks page</h1>
-    <RouterLink :to="{ name: '/projects/[id]', params: { id: 1 } }">go to projects 1</RouterLink>
-    <ul>
-      <li v-for="(task, index) in tasks" :key="index">{{ task.name }}</li>
-    </ul>
+    <DataTable v-if="tasks" :columns="columns" :data="tasks" />
   </div>
 </template>
 

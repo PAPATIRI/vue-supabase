@@ -1,10 +1,10 @@
-<script lang="ts" setup>
+<script setup lang="ts">
 import { useRoute } from 'vue-router'
 
 const route = useRoute()
 </script>
 <template>
   <div>
-    <h1>project name is {{ route.params?.id }}</h1>
+    <p>task id is {{ route.params.id }}</p>
   </div>
 </template>
