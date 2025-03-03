@@ -1,7 +1,4 @@
 <script setup lang="ts">
-import Button from '../ui/button/Button.vue'
-import SideNavbarLink from './SideNavbarLink.vue'
-
 const links = [
   {
     title: 'Dashboard',
