@@ -1,16 +1,14 @@
 <script lang="ts" setup>
-import supabase from '@/lib/supabaseClient'
 import type { ColumnDef } from '@tanstack/vue-table'
-import type { Tables } from '../../../database.types'
 import { RouterLink } from 'vue-router'
-
 import { usePageStore } from '@/stores/page'
+import { taskWithProjectsQuery, type TaskWithProjects } from '@/utils/supabaseQuery'
 
 usePageStore().pageData.title = 'Task Page'
 
-const tasks = ref<Tables<'tasks'>[] | null>(null)
+const tasks = ref<TaskWithProjects | null>(null)
 const getTasks = async () => {
-  const { data, error } = await supabase.from('tasks').select(`*, projects(id, name, slug)`)
+  const { data, error } = await taskWithProjectsQuery
 
   if (error) console.log(error)
 
@@ -18,14 +16,17 @@ const getTasks = async () => {
 }
 await getTasks()
 
-const columns: ColumnDef<Tables<'tasks'>>[] = [
+const columns: ColumnDef<TaskWithProjects[0]>[] = [
   {
     accessorKey: 'name',
     header: () => h('div', { class: 'text-left' }, 'Name'),
     cell: ({ row }) => {
       return h(
         RouterLink,
-        { to: `/tasks/${row.original.id}`, class: 'text-left font-medium w-full block' },
+        {
+          to: `/tasks/${row.original.id}`,
+          class: 'text-left font-medium hover:bg-muted w-full block',
+        },
         () => row.getValue('name'),
       )
     },
@@ -48,11 +49,16 @@ const columns: ColumnDef<Tables<'tasks'>>[] = [
     accessorKey: 'projects',
     header: () => h('div', { class: 'text-left' }, 'Project'),
     cell: ({ row }) => {
-      return h(
-        RouterLink,
-        { to: `/projects/${row.original.projects.slug}`, class: 'text-left font-medium' },
-        () => row.getValue('projects').name,
-      )
+      return row.original.projects
+        ? h(
+            RouterLink,
+            {
+              to: `/projects/${row.original.projects.slug}`,
+              class: 'text-left font-medium hover:bg-muted block w-full',
+            },
+            () => row.original.projects?.name,
+          )
+        : ''
     },
   },
   {
