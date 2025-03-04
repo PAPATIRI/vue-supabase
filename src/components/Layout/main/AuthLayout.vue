@@ -1,6 +1,8 @@
 <script setup lang="ts">
-import SideNavbar from '../SideNavbar.vue'
-import TopNavbar from '../TopNavbar.vue'
+import { usePageStore } from '@/stores/page'
+import { storeToRefs } from 'pinia'
+
+const { pageData } = storeToRefs(usePageStore())
 </script>
 <template>
   <SideNavbar />
@@ -8,7 +10,7 @@ import TopNavbar from '../TopNavbar.vue'
     <TopNavbar />
     <main class="flex flex-col flex-1 gap-4 p-4 lg:gap-6 lg:p-6">
       <div class="flex items-center">
-        <h1 class="text-lg font-semibold md:text-2xl">page title</h1>
+        <h1 class="text-lg font-semibold md:text-2xl">{{ pageData.title }}</h1>
       </div>
       <slot />
     </main>
