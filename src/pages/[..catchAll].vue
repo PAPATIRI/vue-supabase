@@ -4,6 +4,5 @@ import { useErrorStore } from '@/stores/error'
 useErrorStore().setError({ error: 'Page not found', customCode: 404 })
 </script>
 <template>
-  <!-- <AppErrorPage /> -->
-  <div></div>
+  <AppErrorPage />
 </template>
