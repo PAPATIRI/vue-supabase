@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { useErrorStore } from '@/stores/error'
 import { usePageStore } from '@/stores/page'
 import { projectQuery, type Project } from '@/utils/supabaseQuery'
 const route = useRoute('/projects/[slug]')
@@ -12,8 +13,8 @@ watch(
 )
 
 const getProject = async () => {
-  const { data, error } = await projectQuery(route.params.slug)
-  if (error) console.log(error)
+  const { data, error, status } = await projectQuery(route.params.slug)
+  if (error) useErrorStore().setError({ error, customCode: status })
 
   project.value = data
 }
