@@ -1,10 +1,15 @@
 <script setup lang="ts">
+import { useAuthStore } from './stores/auth'
 import { useErrorStore } from './stores/error'
 
 const errorStore = useErrorStore()
 
 onErrorCaptured((error) => {
-  errorStore.setError({ error })
+  errorStore.setError({ error, customCode: 500 })
+})
+
+onMounted(async () => {
+  useAuthStore().trackAuthChanges()
 })
 </script>
 
