@@ -1,8 +1,9 @@
 <script setup lang="ts">
+import { useFormErrors } from '@/composables/formErrors'
 import { login } from '@/utils/supabaseAuth'
 
 const router = useRouter()
-const _error = ref<string | undefined>('')
+const { serverError, handleServerError, realtimeErrors, handleLoginForm } = useFormErrors()
 
 const formData = ref({
   email: '',
@@ -13,8 +14,7 @@ const signin = async () => {
   const { error } = await login(formData.value)
   if (!error) router.push('/')
 
-  _error.value =
-    error?.message === 'Invalid login credentials' ? 'Incorrect email or password' : error?.message
+  handleServerError(error)
 }
 </script>
 
@@ -40,8 +40,14 @@ const signin = async () => {
               placeholder="johndoe19@example.com"
               required
               v-model="formData.email"
-              :class="{ 'border-red-500': _error }"
+              :class="{ 'border-red-500': serverError }"
+              @input="handleLoginForm(formData)"
             />
+            <ul class="text-sm text-left text-red-500" v-if="realtimeErrors?.email.length">
+              <li class="list-disc" v-for="error in realtimeErrors.email" :key="error">
+                {{ error }}
+              </li>
+            </ul>
           </div>
 
           <div class="grid gap-2">
@@ -56,11 +62,16 @@ const signin = async () => {
               autocomplete
               required
               v-model="formData.password"
-              :class="{ 'border-red-500': _error }"
+              :class="{ 'border-red-500': serverError }"
             />
+            <ul class="text-sm text-left text-red-500" v-if="realtimeErrors?.password.length">
+              <li class="list-disc" v-for="error in realtimeErrors.password" :key="error">
+                {{ error }}
+              </li>
+            </ul>
           </div>
-          <ul class="text-sm text-left text-red-500" v-if="_error">
-            <li class="list-disc">{{ _error }}</li>
+          <ul class="text-sm text-left text-red-500" v-if="serverError">
+            <li class="list-disc">{{ serverError }}</li>
           </ul>
           <Button type="submit" class="w-full"> Login </Button>
         </form>
