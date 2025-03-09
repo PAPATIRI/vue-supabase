@@ -114,7 +114,7 @@ const seedTasks = async (numEntries, projectsId, userId) => {
       due_date: faker.date.future(),
       profile_id: userId,
       project_id: faker.helpers.arrayElement(projectsId),
-      collaborators: faker.helpers.arrayElements(userId),
+      collaborators: faker.helpers.arrayElements([userId]),
     })
   }
 
