@@ -1,9 +1,13 @@
 <script lang="ts" setup>
-import { useErrorStore } from '@/stores/error'
+import { useProjectsStore } from '@/stores/loaders/projects'
 import { usePageStore } from '@/stores/page'
-import { projectQuery, type Project } from '@/utils/supabaseQuery'
-const route = useRoute('/projects/[slug]')
-const project = ref<Project | null>(null)
+import { storeToRefs } from 'pinia'
+
+const { slug } = useRoute('/projects/[slug]').params
+
+const projectsLoader = useProjectsStore()
+const { project } = storeToRefs(projectsLoader)
+const { getProject } = projectsLoader
 
 watch(
   () => project.value?.name,
@@ -12,13 +16,7 @@ watch(
   },
 )
 
-const getProject = async () => {
-  const { data, error, status } = await projectQuery(route.params.slug)
-  if (error) useErrorStore().setError({ error, customCode: status })
-
-  project.value = data
-}
-await getProject()
+await getProject(slug)
 </script>
 <template>
   <Table v-if="project">

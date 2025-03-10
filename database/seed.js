@@ -135,7 +135,7 @@ const seedDatabase = async (numEntriesPerTable) => {
   } else {
     userId = testUserId
   }
-  const projectsId = (await seedProjects(numEntriesPerTable)).map((project) => project.id)
+  const projectsId = (await seedProjects(numEntriesPerTable, userId)).map((project) => project.id)
   await seedTasks(numEntriesPerTable, projectsId, userId)
 }
 
