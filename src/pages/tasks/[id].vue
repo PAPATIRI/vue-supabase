@@ -1,10 +1,19 @@
 <script setup lang="ts">
-import { useErrorStore } from '@/stores/error'
+import { useCollabs } from '@/composables/collabs'
+import { useTasksStore } from '@/stores/loaders/tasks'
 import { usePageStore } from '@/stores/page'
-import { taskQuery, type Task } from '@/utils/supabaseQuery'
+import { storeToRefs } from 'pinia'
 
-const route = useRoute('/tasks/[id]')
-const task = ref<Task | null>(null)
+const { id } = useRoute('/tasks/[id]').params
+
+const tasksLoader = useTasksStore()
+const { task } = storeToRefs(tasksLoader)
+const { getTask, updateTask } = tasksLoader
+
+await getTask(id)
+
+const { getProfilesByIds } = useCollabs()
+const collabs = task.value?.collaborators ? await getProfilesByIds(task.value?.collaborators) : []
 
 watch(
   () => task.value?.name,
@@ -12,33 +21,22 @@ watch(
     usePageStore().pageData.title = `Task: ${task.value?.name || ''}`
   },
 )
-
-const getTask = async () => {
-  const { data, error, status } = await taskQuery(Number(route.params.id))
-  if (error) useErrorStore().setError({ error, customCode: status })
-
-  task.value = data
-}
-await getTask()
 </script>
 
 <template>
   <Table v-if="task">
     <TableRow>
       <TableHead> Name </TableHead>
-      <TableCell> {{ task.name }} </TableCell>
+      <TableCell>
+        <AppInPlaceEditText v-model="task.name" @commit="updateTask" />
+      </TableCell>
     </TableRow>
 
     <TableRow>
       <TableHead> Description </TableHead>
       <TableCell>
-        {{ task.description }}
+        <AppInPlaceEditTextarea v-model="task.description" @commit="updateTask" class="h-20" />
       </TableCell>
-    </TableRow>
-
-    <TableRow>
-      <TableHead> Assignee </TableHead>
-      <TableCell>Lorem ipsum</TableCell>
     </TableRow>
 
     <TableRow>
@@ -48,7 +46,9 @@ await getTask()
 
     <TableRow>
       <TableHead> Status </TableHead>
-      <TableCell>{{ task.status }}</TableCell>
+      <TableCell>
+        <AppInPlaceEditStatus v-model="task.status" @commit="updateTask" />
+      </TableCell>
     </TableRow>
 
     <TableRow>
@@ -57,11 +57,17 @@ await getTask()
         <div class="flex">
           <Avatar
             class="-mr-4 border border-primary hover:scale-110 transition-transform"
-            v-for="collab in task.collaborators"
-            :key="collab"
+            v-for="collab in collabs"
+            :key="collab.id"
           >
-            <RouterLink class="w-full h-full flex items-center justify-center" to="">
-              <AvatarImage src="" alt="" />
+            <RouterLink
+              class="w-full h-full flex items-center justify-center"
+              :to="{
+                name: '/users/[username]',
+                params: { username: collab.username },
+              }"
+            >
+              <AvatarImage :src="collab.avatar_url || ''" alt="" />
               <AvatarFallback> </AvatarFallback>
             </RouterLink>
           </Avatar>
@@ -99,3 +105,17 @@ await getTask()
     </TableRow>
   </Table>
 </template>
+
+<style>
+th {
+  @apply w-[100px];
+}
+
+h2 {
+  @apply mb-4 text-lg font-semibold w-fit;
+}
+
+.table-container {
+  @apply overflow-hidden overflow-y-auto rounded-md bg-slate-900 h-80;
+}
+</style>

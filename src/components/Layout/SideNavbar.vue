@@ -1,4 +1,9 @@
 <script setup lang="ts">
+import { useAuthStore } from '@/stores/auth'
+import { storeToRefs } from 'pinia'
+
+const { profile } = storeToRefs(useAuthStore())
+
 const links = [
   {
     title: 'Dashboard',
@@ -16,22 +21,19 @@ const links = [
     icon: 'lucide:badge-check',
   },
 ]
-const accountLinks = [
-  {
-    title: 'Profile',
-    to: '/profile',
-    icon: 'lucide:user',
-  },
-  {
-    title: 'Setting',
-    to: '/profile',
-    icon: 'lucide:settings',
-  },
-  {
-    title: 'Sign Out',
-    icon: 'lucide:log-in',
-  },
-]
+const accountLinks = computed(() => {
+  return [
+    {
+      title: 'Profile',
+      to: `users/${profile.value?.username}`,
+      icon: 'lucide:user',
+    },
+    {
+      title: 'Sign Out',
+      icon: 'lucide:log-in',
+    },
+  ]
+})
 
 const router = useRouter()
 const executeAction = async (linkTitle: string) => {

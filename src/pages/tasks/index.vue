@@ -1,24 +1,25 @@
 <script lang="ts" setup>
-import { useErrorStore } from '@/stores/error'
+import { useCollabs } from '@/composables/collabs'
+import { useTasksStore } from '@/stores/loaders/tasks'
 import { usePageStore } from '@/stores/page'
-import { taskWithProjectsQuery, type TaskWithProjects } from '@/utils/supabaseQuery'
 import { columns } from '@/utils/tableColumns/tasksColumns'
+import { storeToRefs } from 'pinia'
 
 usePageStore().pageData.title = 'Task Page'
 
-const tasks = ref<TaskWithProjects | null>(null)
-const getTasks = async () => {
-  const { data, error, status } = await taskWithProjectsQuery
-
-  if (error) useErrorStore().setError({ error, customCode: status })
-
-  tasks.value = data
-}
+const taskLoader = useTasksStore()
+const { tasks } = storeToRefs(taskLoader)
+const { getTasks } = taskLoader
 await getTasks()
+
+const { getGroupedCollabs, groupedCollabs } = useCollabs()
+getGroupedCollabs(tasks.value ?? [])
+
+const columnsWithCollabs = columns(groupedCollabs)
 </script>
 <template>
   <div>
-    <DataTable v-if="tasks" :columns="columns" :data="tasks" />
+    <DataTable v-if="tasks" :columns="columnsWithCollabs" :data="tasks" />
   </div>
 </template>
 
