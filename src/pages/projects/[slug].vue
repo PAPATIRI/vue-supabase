@@ -35,11 +35,19 @@ const collabs = project.value?.collaborators
     </TableRow>
     <TableRow>
       <TableHead> Description </TableHead>
-      <AppInPlaceEditText v-model="project.description" @commit="updateProject" />
+      <TableCell>
+        <AppInPlaceEditTextarea
+          class="h-20"
+          v-model="project.description"
+          @commit="updateProject"
+        />
+      </TableCell>
     </TableRow>
     <TableRow>
       <TableHead> Status </TableHead>
-      <AppInPlaceEditStatus v-model="project.status" @commit="updateProject" />
+      <TableCell>
+        <AppInPlaceEditStatus v-model="project.status" @commit="updateProject" />
+      </TableCell>
     </TableRow>
     <TableRow>
       <TableHead> Collaborators </TableHead>
@@ -69,7 +77,7 @@ const collabs = project.value?.collaborators
   <section v-if="project" class="mt-10 flex flex-col md:flex-row gap-5 justify-between grow">
     <div class="flex-1">
       <h2>Tasks</h2>
-      <div class="table-container">
+      <div class="table-container p-4">
         <Table>
           <TableHeader>
             <TableRow>
@@ -104,20 +112,6 @@ const collabs = project.value?.collaborators
         <p class="text-muted-foreground text-sm font-semibold px-4 py-3">
           This project doesn't have documents yet...
         </p>
-        <!-- <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead> Name </TableHead>
-          <TableHead> Visibility </TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        <TableRow>
-          <TableCell> Lorem ipsum dolor sit amet. </TableCell>
-          <TableCell> Private </TableCell>
-        </TableRow>
-      </TableBody>
-    </Table> -->
       </div>
     </div>
   </section>
