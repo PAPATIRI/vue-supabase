@@ -28,11 +28,11 @@ await getProject(slug)
     </TableRow>
     <TableRow>
       <TableHead> Description </TableHead>
-      <TableCell>{{ project.description }}</TableCell>
+      <AppInPlaceEditText v-model="project.description" @commit="updateProject" />
     </TableRow>
     <TableRow>
       <TableHead> Status </TableHead>
-      <TableCell>{{ project.status }}</TableCell>
+      <AppInPlaceEditStatus v-model="project.status" @commit="updateProject" />
     </TableRow>
     <TableRow>
       <TableHead> Collaborators </TableHead>
