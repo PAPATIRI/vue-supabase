@@ -1,4 +1,10 @@
-import { projectQuery, projectsQuery, type Project, type Projects } from '@/utils/supabaseQuery'
+import {
+  projectQuery,
+  projectsQuery,
+  updateProjectQuery,
+  type Project,
+  type Projects,
+} from '@/utils/supabaseQuery'
 import { defineStore } from 'pinia'
 import { useErrorStore } from '../error'
 import { useMemoize } from '@vueuse/core'
@@ -63,10 +69,20 @@ export const useProjectsStore = defineStore('projects-store', () => {
     })
   }
 
+  const updateProject = async () => {
+    if (!project.value) return
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { tasks, id, ...projectProperties } = project.value
+
+    await updateProjectQuery(projectProperties, project.value.id)
+  }
+
   return {
     projects,
     getProjects,
     project,
     getProject,
+    updateProject,
   }
 })
