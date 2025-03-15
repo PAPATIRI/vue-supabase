@@ -54,7 +54,6 @@ const createTask = async (formData: CreateNewTask) => {
 
 <template>
   <Sheet v-model:open="sheetOpen">
-    <SheetTrigger>open</SheetTrigger>
     <SheetContent>
       <SheetHeader>
         <SheetTitle>Create new task</SheetTitle>
