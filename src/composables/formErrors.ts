@@ -9,6 +9,10 @@ export const useFormErrors = () => {
   const realtimeErrors = ref<FormErrors<LoginForm>>()
 
   const handleServerError = (error: AuthError) => {
+    if (!error) {
+      serverError.value = ''
+      return
+    }
     serverError.value =
       error.message === 'Invalid login credentials' ? 'Incorect email or password' : error.message
   }
