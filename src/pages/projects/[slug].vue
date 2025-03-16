@@ -1,9 +1,14 @@
 <script lang="ts" setup>
-import { useErrorStore } from '@/stores/error'
+import { useCollabs } from '@/composables/collabs'
+import { useProjectsStore } from '@/stores/loaders/projects'
 import { usePageStore } from '@/stores/page'
-import { projectQuery, type Project } from '@/utils/supabaseQuery'
-const route = useRoute('/projects/[slug]')
-const project = ref<Project | null>(null)
+import { storeToRefs } from 'pinia'
+
+const { slug } = useRoute('/projects/[slug]').params
+
+const projectsLoader = useProjectsStore()
+const { project } = storeToRefs(projectsLoader)
+const { getProject, updateProject } = projectsLoader
 
 watch(
   () => project.value?.name,
@@ -12,27 +17,37 @@ watch(
   },
 )
 
-const getProject = async () => {
-  const { data, error, status } = await projectQuery(route.params.slug)
-  if (error) useErrorStore().setError({ error, customCode: status })
+await getProject(slug)
 
-  project.value = data
-}
-await getProject()
+const { getProfilesByIds } = useCollabs()
+
+const collabs = project.value?.collaborators
+  ? await getProfilesByIds(project.value?.collaborators)
+  : []
 </script>
 <template>
   <Table v-if="project">
     <TableRow>
       <TableHead> Name </TableHead>
-      <TableCell>{{ project.name }}</TableCell>
+      <TableCell>
+        <AppInPlaceEditText v-model="project.name" @commit="updateProject" />
+      </TableCell>
     </TableRow>
     <TableRow>
       <TableHead> Description </TableHead>
-      <TableCell>{{ project.description }}</TableCell>
+      <TableCell>
+        <AppInPlaceEditTextarea
+          class="h-20"
+          v-model="project.description"
+          @commit="updateProject"
+        />
+      </TableCell>
     </TableRow>
     <TableRow>
       <TableHead> Status </TableHead>
-      <TableCell>{{ project.status }}</TableCell>
+      <TableCell>
+        <AppInPlaceEditStatus v-model="project.status" @commit="updateProject" />
+      </TableCell>
     </TableRow>
     <TableRow>
       <TableHead> Collaborators </TableHead>
@@ -40,11 +55,17 @@ await getProject()
         <div class="flex">
           <Avatar
             class="-mr-4 border border-primary hover:scale-110 transition-transform"
-            v-for="collab in project.collaborators"
-            :key="collab"
+            v-for="collab in collabs"
+            :key="collab.id"
           >
-            <RouterLink class="w-full h-full flex items-center justify-center" to="">
-              <AvatarImage src="" alt="" />
+            <RouterLink
+              class="w-full h-full flex items-center justify-center"
+              :to="{
+                name: '/users/[username]',
+                params: { username: collab.username },
+              }"
+            >
+              <AvatarImage :src="collab.avatar_url || ''" alt="" />
               <AvatarFallback> </AvatarFallback>
             </RouterLink>
           </Avatar>
@@ -56,7 +77,7 @@ await getProject()
   <section v-if="project" class="mt-10 flex flex-col md:flex-row gap-5 justify-between grow">
     <div class="flex-1">
       <h2>Tasks</h2>
-      <div class="table-container">
+      <div class="table-container p-4">
         <Table>
           <TableHeader>
             <TableRow>
@@ -68,9 +89,17 @@ await getProject()
 
           <TableBody>
             <TableRow v-for="task in project.tasks" :key="task.id">
-              <TableCell> Lorem ipsum dolor sit amet. </TableCell>
-              <TableCell> In progress </TableCell>
-              <TableCell> 22/08/2024 </TableCell>
+              <TableCell class="p-0">
+                <RouterLink
+                  class="text-left block hover:bg-muted p-4"
+                  :to="{ name: '/tasks/[id]', params: { id: task.id } }"
+                  >{{ task.name }}</RouterLink
+                >
+              </TableCell>
+              <TableCell>
+                <AppInPlaceEditStatus readonly :model-value="task.status" />
+              </TableCell>
+              <TableCell>{{ task.due_date }}</TableCell>
             </TableRow>
           </TableBody>
         </Table>
@@ -83,20 +112,6 @@ await getProject()
         <p class="text-muted-foreground text-sm font-semibold px-4 py-3">
           This project doesn't have documents yet...
         </p>
-        <!-- <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead> Name </TableHead>
-          <TableHead> Visibility </TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        <TableRow>
-          <TableCell> Lorem ipsum dolor sit amet. </TableCell>
-          <TableCell> Private </TableCell>
-        </TableRow>
-      </TableBody>
-    </Table> -->
       </div>
     </div>
   </section>

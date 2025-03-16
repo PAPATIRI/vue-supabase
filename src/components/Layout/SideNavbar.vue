@@ -1,4 +1,9 @@
 <script setup lang="ts">
+import { useAuthStore } from '@/stores/auth'
+import { storeToRefs } from 'pinia'
+
+const { profile } = storeToRefs(useAuthStore())
+
 const links = [
   {
     title: 'Dashboard',
@@ -16,22 +21,19 @@ const links = [
     icon: 'lucide:badge-check',
   },
 ]
-const accountLinks = [
-  {
-    title: 'Profile',
-    to: '/profile',
-    icon: 'lucide:user',
-  },
-  {
-    title: 'Setting',
-    to: '/profile',
-    icon: 'lucide:settings',
-  },
-  {
-    title: 'Sign Out',
-    icon: 'lucide:log-in',
-  },
-]
+const accountLinks = computed(() => {
+  return [
+    {
+      title: 'Profile',
+      to: `users/${profile.value?.username}`,
+      icon: 'lucide:user',
+    },
+    {
+      title: 'Sign Out',
+      icon: 'lucide:log-in',
+    },
+  ]
+})
 
 const router = useRouter()
 const executeAction = async (linkTitle: string) => {
@@ -42,6 +44,8 @@ const executeAction = async (linkTitle: string) => {
     if (isLoggedOut) router.push('/login')
   }
 }
+
+defineEmits(['taskClicked'])
 </script>
 <template>
   <aside
@@ -52,9 +56,19 @@ const executeAction = async (linkTitle: string) => {
         <iconify-icon icon="lucide:menu"></iconify-icon>
       </Button>
 
-      <Button variant="outline" size="icon" class="w-8 h-8">
-        <iconify-icon icon="lucide:plus"></iconify-icon>
-      </Button>
+      <DropdownMenu>
+        <DropdownMenuTrigger>
+          <Button variant="outline" size="icon" class="w-8 h-8">
+            <iconify-icon icon="lucide:plus"></iconify-icon>
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuTrigger>
+          <DropdownMenuContent>
+            <DropdownMenuItem @click="$emit('taskClicked')"> Task </DropdownMenuItem>
+            <DropdownMenuItem>Project</DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenuTrigger>
+      </DropdownMenu>
     </div>
 
     <nav class="flex flex-col gap-2 justify-between h-full relative">
