@@ -125,3 +125,13 @@
 .sclae-leave-to {
   transform: scale(0.3);
 }
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.5s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
